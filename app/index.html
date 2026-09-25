@@ -112,6 +112,7 @@ nav.tabs button.on{color:var(--cinnabar);border-top:3px solid var(--cinnabar);ma
       </div>
       <div class="readout"><span class="deg" id="deg-text">--</span><span class="m" id="mtn-text">待校准</span></div>
       <button class="btn primary" id="btn-perm" style="display:block;margin:14px auto 0">启 用 罗 盘</button>
+      <button class="btn block-center" id="btn-ble" hidden>连接电子罗盘</button>
       <button class="btn block-center" id="btn-install" hidden>安装到主屏幕</button>
       <div class="hint">手机平持，箭头所指即方位角。将箭头对准<b>大门朝外</b>的方向（房屋之「向」），再点下方按钮记为朝向。</div>
       <div class="saved-strip">
@@ -240,6 +241,41 @@ document.getElementById("btn-perm").addEventListener("click", async () => {
     }, 2000);
   } catch (e) { alert("启用失败：" + e.message + "；可用下方手动定向"); }
 });
+/* 外接 BLE 电子罗盘（ESP32 NUS 协议，见 ble-luopan/） */
+if (navigator.bluetooth) document.getElementById("btn-ble").hidden = false;
+document.getElementById("btn-ble").addEventListener("click", async () => {
+  const NUS = { svc: "6e400001-b5a3-f393-e0a9-e50e24dcca9e",
+                tx:  "6e400003-b5a3-f393-e0a9-e50e24dcca9e" };
+  try {
+    const device = await navigator.bluetooth.requestDevice({ filters: [{ services: [NUS.svc] }] });
+    const btn = document.getElementById("btn-ble");
+    btn.textContent = "连接中…";
+    const server = await device.gatt.connect();
+    const ch = await (await server.getPrimaryService(NUS.svc)).getCharacteristic(NUS.tx);
+    await ch.startNotifications();
+    let buf = "";
+    ch.addEventListener("characteristicvaluechanged", e => {
+      buf += new TextDecoder().decode(e.target.value);
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, i).trim();
+        buf = buf.slice(i + 1);
+        if (!line) continue;
+        try {
+          const d = JSON.parse(line);
+          if (typeof d.h === "number") {
+            showDeg(((d.h % 360) + 360) % 360);
+            btn.textContent = `电子罗盘 ${Math.round(d.h)}°${d.c ? "" : " ·未校准"}`;
+          }
+        } catch (err) { /* 半行丢弃 */ }
+      }
+    });
+    device.addEventListener("gattserverdisconnected", () => {
+      btn.textContent = "连接电子罗盘";
+    });
+  } catch (e) { alert("连接失败：" + e.message); }
+});
+
 const slider = document.getElementById("deg-slider");
 function syncSlider(){
   document.getElementById("deg-text2").textContent = slider.value;

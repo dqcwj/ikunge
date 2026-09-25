@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 560" width="780" font-family="Kaiti SC,STKaiti,KaiTi,serif">
+  <rect width="780" height="560" fill="#E9DDBC"/>
+  <text x="390" y="40" font-size="24" fill="#9E2B20" text-anchor="middle" letter-spacing="6">玄機閣 · BLE 电子罗盘 接线图</text>
+
+  <!-- ESP32 DevKit -->
+  <rect x="80" y="80" width="160" height="380" rx="8" fill="#2A2419" stroke="#8A6A2F" stroke-width="2"/>
+  <text x="160" y="110" font-size="17" fill="#E9DDBC" text-anchor="middle">ESP32</text>
+  <text x="160" y="132" font-size="14" fill="#B8AD93" text-anchor="middle">DevKit V1</text>
+  <circle cx="160" cy="440" r="12" fill="#4A3B22" stroke="#8A6A2F"/>
+  <text x="160" y="466" font-size="11" fill="#5F5541" text-anchor="middle">板载 BOOT 键 = 校准键</text>
+
+  <!-- ESP32 右侧引脚 -->
+  <g font-size="13" fill="#E9DDBC" text-anchor="end">
+    <rect x="236" y="112" width="8" height="16" fill="#C4381F"/><text x="232" y="125">3V3</text>
+    <rect x="236" y="152" width="8" height="16" fill="#2A2419" stroke="#E9DDBC"/><text x="232" y="165">GND</text>
+    <rect x="236" y="192" width="8" height="16" fill="#2F8F5B"/><text x="232" y="205">GPIO21 · SDA</text>
+    <rect x="236" y="232" width="8" height="16" fill="#C9973A"/><text x="232" y="245">GPIO22 · SCL</text>
+    <rect x="236" y="272" width="8" height="16" fill="#5F5541"/><text x="232" y="285">GPIO2 · 板载LED</text>
+  </g>
+
+  <!-- QMC5883L 模块 -->
+  <rect x="480" y="100" width="200" height="110" rx="8" fill="#F0E5C9" stroke="#8A6A2F" stroke-width="2"/>
+  <text x="580" y="122" font-size="16" fill="#2A2419" text-anchor="middle">QMC5883L 磁力计</text>
+  <g font-size="12" fill="#2A2419">
+    <circle cx="640" cy="152" r="9" fill="#B3372A" opacity=".7"/>
+    <text x="500" y="142" font-size="12">VCC</text><text x="500" y="162">GND</text><text x="500" y="182">SDA</text><text x="500" y="198">SCL</text>
+  </g>
+
+  <!-- MPU6050 模块 -->
+  <rect x="480" y="300" width="200" height="110" rx="8" fill="#F0E5C9" stroke="#8A6A2F" stroke-width="2"/>
+  <text x="580" y="322" font-size="16" fill="#2A2419" text-anchor="middle">MPU6050 加速度计</text>
+  <text x="580" y="340" font-size="11" fill="#5F5541" text-anchor="middle">（倾角补偿用）</text>
+  <g font-size="12" fill="#2A2419">
+    <text x="500" y="342" font-size="12">VCC</text><text x="500" y="362">GND</text><text x="500" y="382">SDA</text><text x="500" y="398">SCL</text>
+  </g>
+
+  <!-- 走线：红 3V3 / 黑 GND / 绿 SDA / 金 SCL -->
+  <!-- 3V3 -->
+  <g stroke="#C4381F" stroke-width="3" fill="none">
+    <path d="M244,120 H480"/>
+    <path d="M370,120 V320 H480"/>
+  </g>
+  <text x="330" y="112" font-size="12" fill="#C4381F">3.3V</text>
+  <text x="376" y="240" font-size="12" fill="#C4381F">3.3V</text>
+
+  <!-- GND -->
+  <g stroke="#2A2419" stroke-width="3" fill="none">
+    <path d="M244,160 H400 V145 H480"/>
+    <path d="M400,160 V345 H480"/>
+  </g>
+  <text x="312" y="154" font-size="12" fill="#2A2419">GND</text>
+  <text x="406" y="260" font-size="12" fill="#2A2419">GND</text>
+
+  <!-- SDA -->
+  <g stroke="#2F8F5B" stroke-width="3" fill="none">
+    <path d="M244,200 H425 V170 H480"/>
+    <path d="M425,200 V370 H480"/>
+  </g>
+  <text x="316" y="194" font-size="12" fill="#2F8F5B">SDA</text>
+  <text x="431" y="292" font-size="12" fill="#2F8F5B">SDA</text>
+
+  <!-- SCL -->
+  <g stroke="#C9973A" stroke-width="3" fill="none">
+    <path d="M244,240 H445 V195 H480"/>
+    <path d="M445,240 V395 H480"/>
+  </g>
+  <text x="316" y="234" font-size="12" fill="#C9973A">SCL</text>
+  <text x="451" y="326" font-size="12" fill="#C9973A">SCL</text>
+
+  <!-- 说明 -->
+  <rect x="80" y="470" width="620" height="72" rx="6" fill="#F0E5C9" stroke="#8A6A2F"/>
+  <text x="96" y="492" font-size="13" fill="#2A2419">• 两模块均为 I²C，共用 SDA(21)/SCL(22)，供电一律 3.3V，禁止接 5V/VIN</text>
+  <text x="96" y="512" font-size="13" fill="#2A2419">• 校准与 LED 用板载资源，无需额外接线；供电可用 USB 或 3.7V 锂电接 5V/GND</text>
+  <text x="96" y="532" font-size="13" fill="#5F5541">• 实测航向若整体偏 180°，把固件里 FLIP_Z 改为 1 重烧即可</text>
+</svg>
