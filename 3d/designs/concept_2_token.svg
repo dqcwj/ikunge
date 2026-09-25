@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="460" viewBox="0 0 420 460">
+  <title>泰 · 璧首令牌（正视图）</title>
+  <desc>比例尺 1mm=4px。牌身 60×105mm，圆首碑形（拱半径30mm），基板厚6mm，浮雕抬升1.5mm。模数 u=2.5mm=10px。穿绳孔 ⌀12.5mm 位于顶部璧环中心。四色：墨#2A2419 基面 / 鎏金#8A6A2F 边框·璧环·云头·雷纹带 / 朱砂#9E2B20 六爻 / 宣纸#E9DDBC 联珠。</desc>
+
+  <!-- 画底 -->
+  <rect x="0" y="0" width="420" height="460" fill="#DDD2B4"/>
+
+  <defs>
+    <filter id="lift" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- 牌身：鎏金外缘带（圆首碑形轮廓） -->
+  <g filter="url(#lift)">
+    <path d="M 90 140 A 120 120 0 0 1 330 140 L 330 440 L 90 440 Z" fill="#8A6A2F"/>
+  </g>
+
+  <!-- 墨色内场 -->
+  <path d="M 110 140 A 100 100 0 0 1 310 140 L 310 420 L 110 420 Z" fill="#2A2419"/>
+
+  <!-- 顶部璧环（受力件）：鎏金环 + 通孔 -->
+  <circle cx="210" cy="100" r="40" fill="#8A6A2F"/>
+  <circle cx="210" cy="100" r="25" fill="#DDD2B4"/>
+
+  <!-- 双如意云头（三段弧条带，左右镜像） -->
+  <path d="M 258 124 A 7.5 7.5 0 0 1 263 111 A 12 12 0 0 1 285 111 A 7.5 7.5 0 0 1 290 124"
+        fill="none" stroke="#8A6A2F" stroke-width="10" stroke-linecap="round"/>
+  <path d="M 162 124 A 7.5 7.5 0 0 0 157 111 A 12 12 0 0 0 135 111 A 7.5 7.5 0 0 0 130 124"
+        fill="none" stroke="#8A6A2F" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- 六爻 · 泰 111000（自下而上：三阳在下，三阴在上）朱砂 -->
+  <g fill="#9E2B20">
+    <!-- 上六/六五/六四：阴爻，两段 -->
+    <rect x="130" y="170" width="70" height="20" rx="2"/>
+    <rect x="220" y="170" width="70" height="20" rx="2"/>
+    <rect x="130" y="210" width="70" height="20" rx="2"/>
+    <rect x="220" y="210" width="70" height="20" rx="2"/>
+    <rect x="130" y="250" width="70" height="20" rx="2"/>
+    <rect x="220" y="250" width="70" height="20" rx="2"/>
+    <!-- 九三/九二/初九：阳爻，整条 -->
+    <rect x="130" y="290" width="160" height="20" rx="2"/>
+    <rect x="130" y="330" width="160" height="20" rx="2"/>
+    <rect x="130" y="370" width="160" height="20" rx="2"/>
+  </g>
+
+  <!-- 底部雷纹带（勾连回纹，6 单元交替镜像，线宽 1.25mm） -->
+  <g fill="none" stroke="#8A6A2F" stroke-width="5" stroke-linecap="butt">
+    <path d="M 145 405 H 125 V 415 H 135"/>
+    <path d="M 155 405 H 175 V 415 H 165"/>
+    <path d="M 205 405 H 185 V 415 H 195"/>
+    <path d="M 215 405 H 235 V 415 H 225"/>
+    <path d="M 265 405 H 245 V 415 H 255"/>
+    <path d="M 275 405 H 295 V 415 H 285"/>
+  </g>
+
+  <!-- 联珠纹（宣纸），沿鎏金带中线一周：珠径 2.5mm，珠距 5mm -->
+  <g fill="#E9DDBC">
+    <!-- 拱部 17 珠（弧距约 5.4mm） -->
+    <circle cx="210" cy="30" r="5"/>
+    <circle cx="231.5" cy="32.1" r="5"/><circle cx="188.5" cy="32.1" r="5"/>
+    <circle cx="252.1" cy="38.4" r="5"/><circle cx="167.9" cy="38.4" r="5"/>
+    <circle cx="271.1" cy="48.5" r="5"/><circle cx="148.9" cy="48.5" r="5"/>
+    <circle cx="287.8" cy="62.2" r="5"/><circle cx="132.2" cy="62.2" r="5"/>
+    <circle cx="301.5" cy="78.9" r="5"/><circle cx="118.5" cy="78.9" r="5"/>
+    <circle cx="311.6" cy="97.9" r="5"/><circle cx="108.4" cy="97.9" r="5"/>
+    <circle cx="317.9" cy="118.5" r="5"/><circle cx="102.1" cy="118.5" r="5"/>
+    <!-- 左右直边各 13 珠 -->
+    <circle cx="100" cy="170" r="5"/><circle cx="320" cy="170" r="5"/>
+    <circle cx="100" cy="190" r="5"/><circle cx="320" cy="190" r="5"/>
+    <circle cx="100" cy="210" r="5"/><circle cx="320" cy="210" r="5"/>
+    <circle cx="100" cy="230" r="5"/><circle cx="320" cy="230" r="5"/>
+    <circle cx="100" cy="250" r="5"/><circle cx="320" cy="250" r="5"/>
+    <circle cx="100" cy="270" r="5"/><circle cx="320" cy="270" r="5"/>
+    <circle cx="100" cy="290" r="5"/><circle cx="320" cy="290" r="5"/>
+    <circle cx="100" cy="310" r="5"/><circle cx="320" cy="310" r="5"/>
+    <circle cx="100" cy="330" r="5"/><circle cx="320" cy="330" r="5"/>
+    <circle cx="100" cy="350" r="5"/><circle cx="320" cy="350" r="5"/>
+    <circle cx="100" cy="370" r="5"/><circle cx="320" cy="370" r="5"/>
+    <circle cx="100" cy="390" r="5"/><circle cx="320" cy="390" r="5"/>
+    <circle cx="100" cy="410" r="5"/><circle cx="320" cy="410" r="5"/>
+    <!-- 底边 11 珠 -->
+    <circle cx="100" cy="430" r="5"/><circle cx="320" cy="430" r="5"/>
+    <circle cx="130" cy="430" r="5"/><circle cx="290" cy="430" r="5"/>
+    <circle cx="150" cy="430" r="5"/><circle cx="270" cy="430" r="5"/>
+    <circle cx="170" cy="430" r="5"/><circle cx="250" cy="430" r="5"/>
+    <circle cx="190" cy="430" r="5"/><circle cx="230" cy="430" r="5"/>
+    <circle cx="210" cy="430" r="5"/>
+  </g>
+</svg>

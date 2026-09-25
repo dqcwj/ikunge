@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -25 128 145" width="420">
+  <rect x="-20" y="-25" width="128" height="145" fill="#E9DDBC"/>
+  <!-- 背板 -->
+  <path d="M0 32 v-62 a32,32 0 0 1 64,0 v62 z" fill="#F0E5C9" stroke="#B0483A" stroke-width="1.5" transform="translate(0,94) scale(1,-1) translate(0,-94)"/>
+  <rect x="11" y="34.8" width="16" height="5.5" fill="#2A2419"/><rect x="37" y="34.8" width="16" height="5.5" fill="#2A2419"/><rect x="11" y="44.0" width="16" height="5.5" fill="#2A2419"/><rect x="37" y="44.0" width="16" height="5.5" fill="#2A2419"/><rect x="11" y="53.3" width="16" height="5.5" fill="#2A2419"/><rect x="37" y="53.3" width="16" height="5.5" fill="#2A2419"/><rect x="11" y="62.7" width="16" height="5.5" fill="#2A2419"/><rect x="37" y="62.7" width="16" height="5.5" fill="#2A2419"/><rect x="11" y="72.0" width="16" height="5.5" fill="#2A2419"/><rect x="37" y="72.0" width="16" height="5.5" fill="#2A2419"/><rect x="11" y="81.2" width="16" height="5.5" fill="#2A2419"/><rect x="37" y="81.2" width="16" height="5.5" fill="#2A2419"/>
+  <!-- 底座 -->
+  <rect x="-14" y="94" width="92" height="8" fill="#C9B273" stroke="#8A6A2F"/>
+  <rect x="-7" y="102" width="78" height="7" fill="#B89F63" stroke="#8A6A2F"/>
+  <text x="86" y="124" font-size="11" fill="#9E2B20" text-anchor="end" font-family="Kaiti SC,STKaiti,KaiTi,serif">坤 · 000000（自下而上）</text>
+</svg>

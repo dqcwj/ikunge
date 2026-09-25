@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#E9DDBC"/>
+  <circle cx="256" cy="236" r="168" fill="none" stroke="#8A6A2F" stroke-width="14"/>
+  <path d="M256,68 a84,84 0 0 1 0,168 a84,84 0 0 0 0,168 a168,168 0 0 0 0,-336z" fill="#2A2419"/>
+  <circle cx="256" cy="152" r="24" fill="#E9DDBC"/>
+  <circle cx="256" cy="320" r="24" fill="#2A2419"/>
+  <rect x="196" y="428" width="120" height="34" fill="#9E2B20"/>
+  <text x="256" y="455" font-family="Kaiti SC,KaiTi,serif" font-size="30" fill="#F0E5C9"
+        text-anchor="middle" letter-spacing="10">量宅</text>
+</svg>

@@ -1,0 +1,15 @@
+{
+  "name": "玄機閣 · 量宅",
+  "short_name": "量宅",
+  "description": "罗盘定向 · 画户型 · 断形煞（八宅 / 玄空 / 形煞几何判定）",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E9DDBC",
+  "theme_color": "#E9DDBC",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

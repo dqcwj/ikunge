@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2A2419">
+<title>玄機閣 · AR 量房</title>
+<style>
+:root{--paper:#E9DDBC;--ink:#2A2419;--ink-soft:#5F5541;--ink-faint:#8A7E64;
+  --cinnabar:#9E2B20;--gold:#8A6A2F;--card:#F0E5C9;
+  --kai:"Kaiti SC","STKaiti","KaiTi",serif;--song:"Songti SC","STSong","SimSun",serif}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+[hidden]{display:none !important}
+html,body{height:100%;overflow:hidden;background:#1a1712;font-family:var(--song);color:var(--paper)}
+#gate{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:30px;text-align:center;background:radial-gradient(circle at 50% 35%,#2b261e,#171410)}
+#gate h1{font-family:var(--kai);letter-spacing:.35em;font-size:24px;color:var(--card)}
+#gate p{max-width:30em;font-size:15px;line-height:1.9;color:#b8ad93}
+#gate .btn,#overlay .btn{font-family:var(--kai);font-size:18px;letter-spacing:.25em;padding:14px 34px;
+  border:1px solid var(--gold);background:rgba(138,106,47,.25);color:var(--card)}
+#gate .btn.primary,#overlay .btn.primary{background:var(--cinnabar);border-color:var(--cinnabar)}
+#overlay{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between}
+#hud{background:rgba(23,20,16,.72);padding:10px 16px;font-size:14px;line-height:1.8;
+  border-bottom:1px solid rgba(138,106,47,.5)}
+#hud b{font-family:var(--kai);color:#e8b96a;font-weight:400}
+#hud .warn{color:#e88b7d;font-size:13px}
+#dock{pointer-events:auto;padding:10px 10px calc(14px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:10px}
+#tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.tool{pointer-events:auto;font-family:var(--kai);font-size:15px;padding:10px 15px;
+  border:1px solid rgba(240,229,201,.55);background:rgba(23,20,16,.75);color:var(--card)}
+.tool.on{background:var(--cinnabar);border-color:var(--cinnabar)}
+#actions{display:flex;gap:12px;justify-content:center}
+#btn-place{font-size:20px;padding:14px 44px}
+#reticle-hint{align-self:center;background:rgba(23,20,16,.6);padding:6px 16px;font-size:13px;
+  color:#b8ad93;border:1px dashed rgba(138,106,47,.5)}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>玄機閣 · AR 量房</h1>
+  <p id="gate-msg">进入增强现实，沿墙走一圈点出墙角与门窗，自动测距生成北向上户型图，完成后可直接进入形煞判定。<br><br>需要：安卓手机 + Chrome + 「面向AR的Google Play服务」，并通过 HTTPS 访问。</p>
+  <button class="btn primary" id="btn-enter">进 入 A R</button>
+  <button class="btn" id="btn-back" style="font-size:15px;padding:10px 22px">返回手动画图</button>
+</div>
+
+<div id="overlay" hidden>
+  <div id="hud">
+    <div>工具：<b id="hud-tool">墙角</b>　已标 <b id="hud-count">0</b> 点　本段 <b id="hud-dist">--</b></div>
+    <div class="warn" id="hud-warn"></div>
+  </div>
+  <div id="reticle-hint">移动手机，让圆环贴住要标记的位置后点「落点」</div>
+  <div id="dock">
+    <div id="tools"></div>
+    <div id="actions">
+      <button class="btn primary" id="btn-place">落 点</button>
+      <button class="btn" id="btn-undo" style="font-size:15px;padding:12px 20px">撤销</button>
+      <button class="btn" id="btn-done" style="font-size:15px;padding:12px 20px">完成</button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script>
+"use strict";
+/* ============ WebXR AR 量房：打点 → 北向上户型 → localStorage ============ */
+const PX_PER_M = 20;
+const TOOLS = [["corner","墙角"],["entry","入户门"],["door","内门"],["window","窗"],["balcony","阳台门"],
+               ["bed","床"],["sofa","沙发"],["toilet","马桶"],["stove","灶"],["mirror","镜"]];
+/* AR 内拿不到相机画面，物品类型手选；床头方向默认朝北，回户型页可「转床头」 */
+const ITEM_SIZE = { bed: [1.5, 2.0], sofa: [1.8, 0.9], toilet: [0.8, 0.8], stove: [0.8, 0.6], mirror: [0.01, 0.6] };
+let session = null, hitSource = null, reticle = null, heading0 = null, headingGot = false;
+let corners = [], openings = [], items = [], tool = "corner", lastReticle = null;
+
+const overlay = document.getElementById("overlay");
+const gate = document.getElementById("gate");
+const toolsEl = document.getElementById("tools");
+TOOLS.forEach(([id, label]) => {
+  const b = document.createElement("button");
+  b.className = "tool" + (id === tool ? " on" : "");
+  b.textContent = label;
+  b.addEventListener("click", () => {
+    tool = id;
+    document.querySelectorAll(".tool").forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    document.getElementById("hud-tool").textContent = label;
+  });
+  toolsEl.appendChild(b);
+});
+document.getElementById("btn-back").addEventListener("click", () => location.href = "index.html");
+
+/* 罗盘：会话起始时的绝对方位角（世界坐标北向校准） */
+function onOrient(e){
+  let h = null;
+  if (typeof e.webkitCompassHeading === "number" && isFinite(e.webkitCompassHeading)) h = e.webkitCompassHeading;
+  else if (e.absolute === true && typeof e.alpha === "number") h = 360 - e.alpha;
+  if (h != null && isFinite(h)) { heading0 = ((h % 360) + 360) % 360; headingGot = true; }
+}
+window.addEventListener("deviceorientationabsolute", onOrient, true);
+window.addEventListener("deviceorientation", onOrient, true);
+
+document.getElementById("btn-enter").addEventListener("click", async () => {
+  if (!navigator.xr) { fail("此浏览器不支持 WebXR（iPhone Safari 与桌面端均不支持）。请用安卓 Chrome 打开。"); return; }
+  let ok = false;
+  try { ok = await navigator.xr.isSessionSupported("immersive-ar"); } catch (e) {}
+  if (!ok) { fail("此设备不支持 AR 会话。请确认：① 安卓手机 ② Chrome 浏览器 ③ 已装「面向AR的Google Play服务」（小米应用商店可查） ④ 通过 HTTPS 打开本页。"); return; }
+  try {
+    session = await navigator.xr.requestSession("immersive-ar", {
+      requiredFeatures: ["hit-test"],
+      optionalFeatures: ["dom-overlay"],
+      domOverlay: { root: overlay }
+    });
+  } catch (e) { fail("AR 会话创建失败：" + e.message); return; }
+  startXR();
+});
+function fail(msg){
+  document.getElementById("gate-msg").innerHTML = msg + "<br><br>仍可返回量宅页手动画图，判定能力完全一致。";
+  document.getElementById("btn-enter").hidden = true;
+}
+
+/* ---------- three.js 场景 ---------- */
+let renderer, scene, camera, lineObj, liveLine;
+function startXR(){
+  gate.hidden = true;
+  overlay.hidden = false;
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.01, 40);
+
+  reticle = new THREE.Mesh(
+    new THREE.RingGeometry(0.07, 0.09, 36).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: 0xE8B96A })
+  );
+  reticle.matrixAutoUpdate = false; reticle.visible = false;
+  scene.add(reticle);
+
+  lineObj = new THREE.Line(new THREE.BufferGeometry(),
+    new THREE.LineBasicMaterial({ color: 0xF0E5C9, linewidth: 2 }));
+  scene.add(lineObj);
+  liveLine = new THREE.Line(new THREE.BufferGeometry(),
+    new THREE.LineBasicMaterial({ color: 0x9E2B20 }));
+  scene.add(liveLine);
+
+  session.addEventListener("end", () => { overlay.hidden = true; gate.hidden = false; });
+  session.addEventListener("select", () => place());          /* 点相机画面 = 落点 */
+
+  (async () => {
+    const viewer = await session.requestReferenceSpace("viewer");
+    hitSource = await session.requestHitTestSource({ space: viewer });
+  })();
+  renderer.xr.setReferenceSpaceType("local");
+  renderer.xr.setSession(session);
+  renderer.setAnimationLoop(onFrame);
+}
+
+function onFrame(time, frame){
+  const refSpace = renderer.xr.getReferenceSpace();
+  if (frame && hitSource && refSpace) {
+    const hits = frame.getHitTestResults(hitSource);
+    if (hits.length) {
+      const pose = hits[0].getPose(refSpace);
+      reticle.visible = true;
+      reticle.matrix.fromArray(pose.transform.matrix);
+      const p = pose.transform.position;
+      lastReticle = new THREE.Vector3(p.x, p.y, p.z);
+      updateLive();
+    } else { reticle.visible = false; lastReticle = null; }
+  }
+  renderer.render(scene, camera);
+}
+
+function updateLive(){
+  if (!lastReticle) { liveLine.geometry.setFromPoints([]); return; }
+  const pts = [];
+  if (corners.length) pts.push(corners[corners.length - 1].v, lastReticle);
+  liveLine.geometry.dispose();
+  liveLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+  const d = corners.length ? corners[corners.length - 1].v.distanceTo(lastReticle) : 0;
+  document.getElementById("hud-dist").textContent = d.toFixed(2) + " m";
+}
+
+function place(){
+  if (!lastReticle) return;
+  const v = lastReticle.clone();
+  if (tool === "corner") {
+    corners.push({ v });
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.028, 14, 14),
+      new THREE.MeshBasicMaterial({ color: 0xE9DDBC }));
+    dot.position.copy(v); scene.add(dot);
+    redrawLine();
+  } else if (ITEM_SIZE[tool]) {
+    items.push({ type: tool, x: v.x, z: v.z });
+    const dot = new THREE.Mesh(
+      new THREE.BoxGeometry(ITEM_SIZE[tool][0], tool === "mirror" ? 0.7 : 0.12, ITEM_SIZE[tool][1]),
+      new THREE.MeshBasicMaterial({ color: tool === "bed" || tool === "stove" ? 0xC4381F : 0x33586B }));
+    dot.position.set(v.x, v.y + 0.1, v.z);
+    scene.add(dot);
+  } else {
+    openings.push({ type: tool, x: v.x, z: v.z });
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.038, 14, 14),
+      new THREE.MeshBasicMaterial({ color: tool === "entry" ? 0xC4381F : 0x8A6A2F }));
+    dot.position.copy(v); scene.add(dot);
+  }
+  document.getElementById("hud-count").textContent = corners.length + openings.length + items.length;
+  if (!headingGot) document.getElementById("hud-warn").textContent = "未取到绝对方位，北向按启动朝向近似";
+}
+function redrawLine(){
+  lineObj.geometry.dispose();
+  lineObj.geometry = new THREE.BufferGeometry().setFromPoints(corners.map(c => c.v));
+}
+
+document.getElementById("btn-place").addEventListener("click", place);
+document.getElementById("btn-undo").addEventListener("click", () => {
+  if (items.length) items.pop();
+  else if (openings.length) openings.pop();
+  else if (corners.length) corners.pop();
+  document.getElementById("hud-count").textContent = corners.length + openings.length + items.length;
+  redrawLine(); updateLive();
+});
+document.getElementById("btn-done").addEventListener("click", () => {
+  if (corners.length < 3) { alert("至少需要 3 个墙角点"); return; }
+  exportPlan();
+  if (session) session.end().catch(() => {});
+  location.href = "index.html#plan";
+});
+
+/* ---------- 导出：世界坐标 → 北向上平面坐标 ---------- */
+/* 会话启动时设备朝向为 -Z，罗盘读数 heading0 ⇒ 任意方向 d 的罗盘方位 =
+   heading0 + atan2(d.x, -d.z)·180/π；北位移 N=|d|·cos，东位移 E=|d|·sin；
+   画布北向上：x_px = E·PX_PER_M，y_px = -N·PX_PER_M                        */
+function exportPlan(){
+  const h0 = (heading0 == null ? 0 : heading0) * Math.PI / 180;
+  const origin = corners[0].v;
+  const toPlan = (x, z) => {
+    const dx = x - origin.x, dz = z - origin.z;
+    const bearing = h0 + Math.atan2(dx, -dz);          /* 该方向的罗盘方位（弧度） */
+    const dist = Math.hypot(dx, dz);
+    return [dist * Math.sin(bearing) * PX_PER_M, -dist * Math.cos(bearing) * PX_PER_M];
+  };
+  const poly = corners.map(c => toPlan(c.v.x, c.v.z));
+  const ops = openings.map(o => { const [x, y] = toPlan(o.x, o.z); return { type: o.type, x, y }; });
+  const its = items.map(o => {
+    const [x, y] = toPlan(o.x, o.z);
+    const [w, h] = ITEM_SIZE[o.type];
+    return o.type === "bed"
+      ? { type: "bed", x: x - w * PX_PER_M / 2, y: y - h * PX_PER_M / 2, w: w * PX_PER_M, h: h * PX_PER_M, head: "up" }
+      : { type: o.type, x, y };
+  });
+  /* 平移到画布安全区（留 40px 边距） */
+  const xs = poly.map(p => p[0]), ys = poly.map(p => p[1]);
+  const mx = 40 - Math.min(...xs), my = 40 - Math.min(...ys);
+  const shift = p => [p[0] + mx, p[1] + my];
+  localStorage.setItem("lz_plan", JSON.stringify({
+    plan: { poly: poly.map(shift), closed: true,
+            openings: ops.map(o => ({ type: o.type, x: o.x + mx, y: o.y + my })),
+            items: its.map(it => it.type === "bed" ? { ...it, x: it.x + mx, y: it.y + my } : { ...it, x: it.x + mx, y: it.y + my }) },
+    pxm: PX_PER_M,
+    north_calibrated: headingGot
+  }));
+}
+</script>
+</body>
+</html>

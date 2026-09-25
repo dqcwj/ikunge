@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="1058" viewBox="-25 -6 50 126">
+  <!-- 交泰圭 · 玉圭谱系正视图  模数 u=6mm  总体 40 x 114 x 6mm -->
+  <rect x="-25" y="-6" width="50" height="126" fill="#DDD2B4"/>
+
+  <!-- 牌身（墨）：圭首三层收分（坡1:2）+ 两次肩折 + 直壁 -->
+  <path fill="#2A2419" d="M -2 0 L 2 0 L 6 8 L 10 8 L 14 16 L 16 16 L 20 24 L 20 114 L -20 114 L -20 24 L -16 16 L -14 16 L -10 8 L -6 8 Z"/>
+
+  <!-- 穿绳玉环（鎏金）：肉好若一，好6 肉6 外径18，圆心(0,20) -->
+  <circle cx="0" cy="20" r="9" fill="#8A6A2F"/>
+  <circle cx="0" cy="20" r="3" fill="#DDD2B4"/>
+
+  <!-- 回纹带（金地墨回，雷纹带）：y24-34 全宽，四枚回单元 8x8，环肉1.6 心点2 -->
+  <rect x="-20" y="24" width="40" height="10" fill="#8A6A2F"/>
+  <g>
+    <rect x="-19" y="25" width="8" height="8" fill="#2A2419"/>
+    <rect x="-17.4" y="26.6" width="4.8" height="4.8" fill="#8A6A2F"/>
+    <rect x="-16" y="28" width="2" height="2" fill="#2A2419"/>
+    <rect x="-9" y="25" width="8" height="8" fill="#2A2419"/>
+    <rect x="-7.4" y="26.6" width="4.8" height="4.8" fill="#8A6A2F"/>
+    <rect x="-6" y="28" width="2" height="2" fill="#2A2419"/>
+    <rect x="1" y="25" width="8" height="8" fill="#2A2419"/>
+    <rect x="2.6" y="26.6" width="4.8" height="4.8" fill="#8A6A2F"/>
+    <rect x="4" y="28" width="2" height="2" fill="#2A2419"/>
+    <rect x="11" y="25" width="8" height="8" fill="#2A2419"/>
+    <rect x="12.6" y="26.6" width="4.8" height="4.8" fill="#8A6A2F"/>
+    <rect x="14" y="28" width="2" height="2" fill="#2A2419"/>
+  </g>
+
+  <!-- 宣纸开光（盘面）：x±17, y34-104, 内卦场留白2mm -->
+  <rect x="-17" y="34" width="34" height="70" fill="#E9DDBC"/>
+
+  <!-- 六爻（朱砂）：上三阴（坤，两段），下三阳（乾，整条），爻宽6 行距12 -->
+  <g fill="#9E2B20">
+    <rect x="-15" y="36" width="12" height="6"/>
+    <rect x="3"   y="36" width="12" height="6"/>
+    <rect x="-15" y="48" width="12" height="6"/>
+    <rect x="3"   y="48" width="12" height="6"/>
+    <rect x="-15" y="60" width="12" height="6"/>
+    <rect x="3"   y="60" width="12" height="6"/>
+    <rect x="-15" y="72" width="30" height="6"/>
+    <rect x="-15" y="84" width="30" height="6"/>
+    <rect x="-15" y="96" width="30" height="6"/>
+  </g>
+
+  <!-- 底缘联珠（鎏金）：七珠 Ø4 距6，中线y109 -->
+  <g fill="#8A6A2F">
+    <circle cx="-18" cy="109" r="2"/>
+    <circle cx="-12" cy="109" r="2"/>
+    <circle cx="-6"  cy="109" r="2"/>
+    <circle cx="0"   cy="109" r="2"/>
+    <circle cx="6"   cy="109" r="2"/>
+    <circle cx="12"  cy="109" r="2"/>
+    <circle cx="18"  cy="109" r="2"/>
+  </g>
+</svg>

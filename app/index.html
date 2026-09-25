@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#E9DDBC">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>玄機閣 · 量宅</title>
+<style>
+:root{
+  --paper:#E9DDBC; --paper-card:#F0E5C9; --ink:#2A2419; --ink-soft:#5F5541;
+  --ink-faint:#8A7E64; --cinnabar:#9E2B20; --cinnabar-deep:#7C1F16;
+  --gold:#8A6A2F; --rule-red:#B0483A;
+  --font-kai:"Kaiti SC","STKaiti","KaiTi","DFKai-SB",serif;
+  --font-song:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+[hidden]{display:none !important}
+body{font-family:var(--font-song);background:var(--paper);color:var(--ink);font-size:16px;
+     padding-bottom:calc(64px + env(safe-area-inset-bottom));overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(58,44,20,.16))}
+main{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:18px 16px 10px}
+h1{font-family:var(--font-kai);font-size:22px;letter-spacing:.35em;color:var(--cinnabar);text-align:center}
+.sub{text-align:center;font-size:13px;color:var(--ink-faint);letter-spacing:.2em;margin:4px 0 18px}
+.screen[hidden]{display:none}
+.card{background:var(--paper-card);border:1px solid var(--rule-red);outline:1px solid var(--rule-red);
+      outline-offset:3px;padding:20px 18px;margin-bottom:18px}
+.card h2{font-family:var(--font-kai);font-size:17px;letter-spacing:.3em;color:var(--cinnabar);
+         font-weight:400;margin-bottom:12px}
+.btn{font-family:var(--font-kai);font-size:17px;letter-spacing:.2em;padding:12px 22px;
+     border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--cinnabar);border-color:var(--cinnabar);color:#F5EDD8}
+.btn.small{font-size:14px;padding:8px 14px;letter-spacing:.1em}
+.block-center{display:block;margin:12px auto 0}
+/* 罗盘 */
+.dial-wrap{position:relative;width:260px;height:260px;margin:6px auto}
+.dial{position:absolute;inset:0;border-radius:50%;border:2px solid var(--gold);
+      background:radial-gradient(circle,#F3EAD2 55%,#E4D5AE);box-shadow:inset 0 0 0 8px rgba(138,106,47,.18)}
+.dial-rose{position:absolute;inset:0;transition:transform .15s linear}
+.mtn{position:absolute;left:50%;top:50%;font-family:var(--font-kai);font-size:13px;color:var(--ink-soft)}
+.mtn.card{color:var(--cinnabar);font-weight:700}
+.needle{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:center}
+.needle::before,.needle::after{content:"";position:absolute;left:-4px;width:8px;height:56px;border-radius:4px}
+.needle::before{top:-78px;background:var(--cinnabar)}
+.needle::after{top:22px;background:var(--ink)}
+.needle-dot{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--gold)}
+.readout{text-align:center;margin-top:10px}
+.readout .deg{font-family:var(--font-kai);font-size:34px;color:var(--ink)}
+.readout .m{font-family:var(--font-kai);font-size:18px;color:var(--cinnabar);letter-spacing:.2em;margin-left:12px}
+.hint{font-size:13px;color:var(--ink-faint);line-height:1.7;margin-top:10px}
+.saved-strip{display:flex;align-items:center;justify-content:space-between;gap:10px;
+             border-top:1px dashed rgba(138,106,47,.4);margin-top:16px;padding-top:14px;font-size:15px}
+.saved-strip b{font-family:var(--font-kai);color:var(--cinnabar);font-weight:400}
+input[type=range]{width:100%;accent-color:var(--cinnabar);margin:10px 0 4px}
+input[type=number]{font-family:var(--font-song);font-size:16px;padding:9px 10px;width:110px;
+  border:1px solid var(--ink-faint);background:rgba(240,229,201,.8);color:var(--ink)}
+/* 工具栏 */
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tool{font-family:var(--font-kai);font-size:15px;padding:9px 13px;border:1px solid var(--ink-faint);
+      background:rgba(240,229,201,.7);color:var(--ink)}
+.tool.on{background:var(--cinnabar);border-color:var(--cinnabar);color:#F5EDD8}
+canvas{width:100%;height:56vh;background:#F3EAD2;border:1px solid var(--gold);touch-action:manipulation;display:block}
+.scale-row{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:14px;color:var(--ink-soft)}
+/* 报告 */
+.rep-info{display:flex;flex-wrap:wrap;gap:8px 26px;font-size:15.5px;margin-bottom:16px}
+.rep-info b{font-family:var(--font-kai);color:var(--cinnabar);font-weight:400}
+.findings{list-style:none}
+.findings li{padding:13px 0;border-bottom:1px dashed rgba(138,106,47,.35)}
+.findings .fname{font-family:var(--font-kai);font-size:17px;letter-spacing:.1em}
+.findings .sev{float:right;font-family:var(--font-kai);font-size:13px;letter-spacing:.2em}
+.sev3,.sev3 .sev{color:var(--cinnabar)} .sev2,.sev2 .sev{color:var(--gold)} .sev1{color:var(--ink-soft)}
+.findings .detail{font-size:14px;color:var(--ink-soft);margin-top:4px;line-height:1.7}
+.findings .remedy{font-size:13.5px;color:var(--ink-faint);margin-top:2px}
+.grid-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:270px;margin:8px auto}
+.grid-mini div{border:1px solid var(--ink-faint);min-height:64px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;font-size:11px;color:var(--ink-faint);background:rgba(240,229,201,.55)}
+.grid-mini .star{font-family:var(--font-kai);font-size:16px}
+.grid-mini .ji{background:rgba(158,43,32,.09);border-color:var(--cinnabar)}
+.grid-mini .ji .star{color:var(--cinnabar)}
+.grid-mini .xiong .star{color:var(--ink-soft)}
+.outcheck{list-style:none;margin-top:8px}
+.outcheck li{padding:9px 0;border-bottom:1px dashed rgba(138,106,47,.35);font-size:15px}
+.outcheck input{margin-right:10px;accent-color:var(--cinnabar);transform:translateY(2px)}
+.foot{font-size:12.5px;color:var(--ink-faint);line-height:1.8;text-align:center;margin:18px 0 8px}
+/* 底部页签 */
+nav.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;z-index:10;
+  background:rgba(233,221,188,.96);border-top:1px solid rgba(154,43,32,.45);
+  padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;font-family:var(--font-kai);font-size:17px;letter-spacing:.25em;color:var(--ink-soft);
+  background:none;border:none;padding:15px 0 13px;cursor:pointer}
+nav.tabs button.on{color:var(--cinnabar);border-top:3px solid var(--cinnabar);margin-top:-1px}
+</style>
+</head>
+<body>
+<main>
+  <h1>玄機閣 · 量宅</h1>
+  <p class="sub">罗盘定向 · 画户型 · 断形煞</p>
+
+  <!-- ============ 罗盘 ============ -->
+  <section class="screen" id="scr-compass">
+    <div class="card">
+      <h2>电子罗盘</h2>
+      <div class="dial-wrap">
+        <div class="dial"></div>
+        <div class="dial-rose" id="rose"></div>
+        <div class="needle" id="needle"><div class="needle-dot"></div></div>
+      </div>
+      <div class="readout"><span class="deg" id="deg-text">--</span><span class="m" id="mtn-text">待校准</span></div>
+      <button class="btn primary" id="btn-perm" style="display:block;margin:14px auto 0">启 用 罗 盘</button>
+      <button class="btn block-center" id="btn-install" hidden>安装到主屏幕</button>
+      <div class="hint">手机平持，箭头所指即方位角。将箭头对准<b>大门朝外</b>的方向（房屋之「向」），再点下方按钮记为朝向。</div>
+      <div class="saved-strip">
+        <span id="facing-show">尚未记录朝向</span>
+        <button class="btn small" id="btn-facing">记为朝向</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>手动定向（无传感器时）</h2>
+      <input type="range" id="deg-slider" min="0" max="359" value="180">
+      <div class="readout" style="margin-top:0"><span class="deg" id="deg-text2">180</span><span class="m" id="mtn-text2">午</span></div>
+      <div class="hint">从户型图或地图上量出大门朝外方位角，拖动滑杆后同样点「记为朝向」。</div>
+    </div>
+  </section>
+
+  <!-- ============ 户型 ============ -->
+  <section class="screen" id="scr-plan" hidden>
+    <div class="card" style="padding:14px 12px">
+      <div class="tools" id="tools"></div>
+      <canvas id="cv"></canvas>
+      <div class="scale-row">
+        <span>比例</span><input type="number" id="pxm" value="20" min="5" max="100" step="1"><span>像素/米</span>
+        <button class="btn small" id="btn-head" style="margin-left:auto">转床头</button>
+      </div>
+      <div class="hint" id="plan-hint">先点「墙」沿房屋轮廓逐点点击，至少三点后点「闭合」；再选其他工具放置门窗家具。画布上方为北。</div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <a class="btn small" href="ar.html" style="flex:1;text-align:center;text-decoration:none">AR 量房</a>
+        <a class="btn small" href="scan.html" style="flex:1;text-align:center;text-decoration:none">识物（拍照识别）</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 报告 ============ -->
+  <section class="screen" id="scr-report" hidden>
+    <div class="card">
+      <h2>宅盘参数</h2>
+      <div class="scale-row" style="margin:0 0 14px">
+        <span>建宅年份</span><input type="number" id="rep-year" value="2024" min="1900" max="2099">
+        <button class="btn primary small" id="btn-run" style="margin-left:auto">起 报 告</button>
+      </div>
+      <div class="rep-info" id="rep-info"></div>
+      <div class="grid-mini" id="rep-grid"></div>
+      <ul class="outcheck" id="out-check"></ul>
+    </div>
+    <div class="card">
+      <h2>形煞判定</h2>
+      <ul class="findings" id="rep-findings"></ul>
+    </div>
+    <p class="foot">引擎规则经多源考证与交叉校验（八宅·玄空下卦·形煞几何判定）。室内罗盘受钢筋家电干扰，方位差 15° 结论即变，宜多测取稳。所有内容仅供传统文化娱乐参考，不构成决策建议。</p>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button class="on" data-scr="scr-compass">罗盘</button>
+  <button data-scr="scr-plan">户型</button>
+  <button data-scr="scr-report">报告</button>
+</nav>
+
+<script src="../fengshui.js"></script>
+<script src="xingsha.js"></script>
+<script>
+"use strict";
+/* ================= 页签 ================= */
+document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav.tabs button").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  document.querySelectorAll(".screen").forEach(s => s.hidden = s.id !== b.dataset.scr);
+  if (b.dataset.scr === "scr-plan") fitCanvas();
+}));
+/* AR 页返回时按 hash 直达页签 */
+if (location.hash === "#plan") document.querySelector('[data-scr="scr-plan"]').click();
+if (location.hash === "#report") document.querySelector('[data-scr="scr-report"]').click();
+
+/* ================= 罗盘 ================= */
+const MOUNTAINS = ["子","癸","丑","艮","寅","甲","卯","乙","辰","巽","巳","丙","午","丁","未","坤","申","庚","酉","辛","戌","乾","亥","壬"];
+const mtnOf = deg => MOUNTAINS[Math.round(((deg % 360) + 360) % 360 / 15) % 24];
+const rose = document.getElementById("rose");
+const CARDINAL = { "子":1, "卯":1, "午":1, "酉":1, "乾":1, "坤":1, "艮":1, "巽":1 };
+MOUNTAINS.forEach((m, i) => {
+  const d = document.createElement("span");
+  d.className = "mtn" + (CARDINAL[m] ? " card" : "");
+  d.textContent = m;
+  d.style.transform = `translate(-50%,-50%) rotate(${i * 15}deg) translateY(-108px)`;
+  rose.appendChild(d);
+});
+let curDeg = null;
+function showDeg(deg){
+  curDeg = deg;
+  document.getElementById("deg-text").textContent = Math.round(deg) + "°";
+  document.getElementById("mtn-text").textContent = mtnOf(deg);
+  document.getElementById("needle").style.transform = `rotate(${deg}deg)`;
+}
+/* 屏幕旋转补偿（横屏时读数随屏幕转） */
+function screenAngle(){
+  if (screen.orientation && typeof screen.orientation.angle === "number") return screen.orientation.angle;
+  return Number(window.orientation) || 0;
+}
+/* 统一处理器：
+   iOS：deviceorientation.webkitCompassHeading（真北）
+   安卓：deviceorientationabsolute（e.absolute===true，alpha 为世界绝对方位角）
+   相对方位事件（e.absolute 为 false 且无 webkitCompassHeading）一律忽略，防污染 */
+function handler(e){
+  let h = null;
+  if (typeof e.webkitCompassHeading === "number" && isFinite(e.webkitCompassHeading)) h = e.webkitCompassHeading;
+  else if (e.absolute === true && typeof e.alpha === "number") h = 360 - e.alpha;
+  if (h != null && isFinite(h)) showDeg(((h + screenAngle()) % 360 + 360) % 360);
+}
+document.getElementById("btn-perm").addEventListener("click", async () => {
+  if (!window.isSecureContext) {
+    alert("当前是 HTTP 地址，浏览器在此模式下禁用了方向传感器 API（不是手机没有传感器——高德能用是因为它是 App 或 HTTPS）。\n\n解决：通过 HTTPS 地址访问本应用（部署后即可），或暂时使用下方「手动定向」。");
+    return;
+  }
+  const D = window.DeviceOrientationEvent;
+  if (!D) { alert("此浏览器未提供方向传感器接口，请用下方手动定向"); return; }
+  try {
+    if (typeof D.requestPermission === "function") {          /* 仅 iOS 13+ 需要 */
+      const r = await D.requestPermission();
+      if (r !== "granted") { alert("权限未授予，请用手动定向"); return; }
+    }
+    /* 安卓 Chrome：绝对方位事件；两种都挂，handler 自行甄别 */
+    window.addEventListener("deviceorientationabsolute", handler, true);
+    window.addEventListener("deviceorientation", handler, true);
+    document.getElementById("btn-perm").textContent = "罗盘已启用";
+    setTimeout(() => {
+      if (curDeg == null) document.getElementById("mtn-text").textContent = "无绝对读数";
+    }, 2000);
+  } catch (e) { alert("启用失败：" + e.message + "；可用下方手动定向"); }
+});
+const slider = document.getElementById("deg-slider");
+function syncSlider(){
+  document.getElementById("deg-text2").textContent = slider.value;
+  document.getElementById("mtn-text2").textContent = mtnOf(Number(slider.value));
+}
+slider.addEventListener("input", syncSlider); syncSlider();
+function savedFacingShow(){
+  const f = localStorage.getItem("lz_facing");
+  document.getElementById("facing-show").innerHTML = f
+    ? `已记朝向：<b>${JSON.parse(f).mtn}</b>（坐 ${FS.OPP_MTN[JSON.parse(f).mtn]}）`
+    : "尚未记录朝向";
+}
+document.getElementById("btn-facing").addEventListener("click", () => {
+  const deg = curDeg != null ? curDeg : Number(slider.value);
+  const mtn = mtnOf(deg);
+  localStorage.setItem("lz_facing", JSON.stringify({ deg: Math.round(deg), mtn }));
+  savedFacingShow();
+});
+savedFacingShow();
+
+/* ================= 户型画布 ================= */
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+let plan = { poly: [], closed: false, openings: [], items: [] };
+let tool = "wall";
+const pxmEl = document.getElementById("pxm");
+const pxm = () => Number(pxmEl.value) || 20;
+
+const TOOLS = [["wall","墙"],["close","闭合"],["entry","入户门"],["door","内门"],["window","窗"],
+               ["balcony","阳台门"],["elevator","电梯"],["bed","床"],["sofa","沙发"],["stove","灶"],
+               ["toilet","厕"],["mirror","镜"],["beam","梁"],["undo","撤销"],["clear","清空"]];
+const toolsEl = document.getElementById("tools");
+TOOLS.forEach(([id, label]) => {
+  const b = document.createElement("button");
+  b.className = "tool" + (id === tool ? " on" : "");
+  b.textContent = label; b.dataset.tool = id;
+  b.addEventListener("click", () => { useTool(id); });
+  toolsEl.appendChild(b);
+});
+function useTool(id){
+  if (id === "close") { if (plan.poly.length >= 3) { plan.closed = true; save(); draw(); } return; }
+  if (id === "undo") {
+    if (!plan.closed && plan.poly.length) plan.poly.pop();
+    else if (plan.openings.length) plan.openings.pop();
+    else if (plan.items.length) plan.items.pop();
+    else if (plan.closed) { plan.closed = false; }
+    save(); draw(); return;
+  }
+  if (id === "clear") { plan = { poly: [], closed: false, openings: [], items: [] }; save(); draw(); return; }
+  tool = id;
+  document.querySelectorAll(".tool").forEach(b => b.classList.toggle("on", b.dataset.tool === id));
+}
+function fitCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth || 360;
+  cv.width = w * dpr; cv.height = cv.clientHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+window.addEventListener("resize", fitCanvas);
+
+const OP_STYLE = { entry: ["门", "#9E2B20"], door: ["门", "#2A2419"], window: ["窗", "#33586B"],
+                   balcony: ["台", "#8A6A2F"], elevator: ["梯", "#5F5541"] };
+function draw(){
+  const w = cv.width / (window.devicePixelRatio || 1), h = cv.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+  /* 1m 网格 */
+  ctx.strokeStyle = "rgba(138,106,47,.14)"; ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += pxm()) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let y = 0; y < h; y += pxm()) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+  /* 北向标 */
+  ctx.fillStyle = "#9E2B20"; ctx.font = '15px "Kaiti SC","KaiTi",serif';
+  ctx.fillText("北 ↑", 10, 22);
+  /* 户型 */
+  if (plan.poly.length) {
+    ctx.beginPath();
+    plan.poly.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    if (plan.closed) ctx.closePath();
+    if (plan.closed) { ctx.fillStyle = "rgba(42,36,25,.07)"; ctx.fill(); }
+    ctx.strokeStyle = plan.closed ? "#2A2419" : "#5F5541"; ctx.lineWidth = 3; ctx.stroke();
+    plan.poly.forEach(p => { ctx.fillStyle = "#2A2419"; ctx.beginPath(); ctx.arc(p[0], p[1], 4, 0, 7); ctx.fill(); });
+  }
+  /* 门窗 */
+  plan.openings.forEach(o => {
+    const [g, c] = OP_STYLE[o.type];
+    ctx.fillStyle = c; ctx.beginPath(); ctx.arc(o.x, o.y, 13, 0, 7); ctx.fill();
+    ctx.fillStyle = "#F0E5C9"; ctx.font = '13px "Kaiti SC","KaiTi",serif';
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(g, o.x, o.y + 1); ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  });
+  /* 家具 */
+  plan.items.forEach(it => {
+    ctx.strokeStyle = "#33586B"; ctx.lineWidth = 2;
+    if (it.type === "bed") {
+      ctx.strokeRect(it.x, it.y, it.w, it.h);
+      ctx.fillStyle = "#33586B"; ctx.font = '13px "Kaiti SC","KaiTi",serif';
+      ctx.fillText("床", it.x + it.w / 2 - 6, it.y + it.h / 2 + 4);
+      ctx.lineWidth = 6; ctx.beginPath();                        /* 床头粗线 */
+      if (it.head === "up")    { ctx.moveTo(it.x, it.y); ctx.lineTo(it.x + it.w, it.y); }
+      if (it.head === "down")  { ctx.moveTo(it.x, it.y + it.h); ctx.lineTo(it.x + it.w, it.y + it.h); }
+      if (it.head === "left")  { ctx.moveTo(it.x, it.y); ctx.lineTo(it.x, it.y + it.h); }
+      if (it.head === "right") { ctx.moveTo(it.x + it.w, it.y); ctx.lineTo(it.x + it.w, it.y + it.h); }
+      ctx.stroke(); ctx.lineWidth = 2;
+    } else if (it.type === "beam") {
+      ctx.save(); ctx.strokeStyle = "#9E2B20"; ctx.setLineDash([6, 4]);
+      ctx.strokeRect(it.x, it.y, it.w, it.h);
+      ctx.fillStyle = "rgba(158,43,32,.12)"; ctx.fillRect(it.x, it.y, it.w, it.h); ctx.restore();
+    } else if (it.type === "sofa") {
+      ctx.strokeRect(it.x, it.y, it.w, it.h);
+      ctx.fillStyle = "#33586B"; ctx.font = '13px "Kaiti SC","KaiTi",serif';
+      ctx.fillText("沙发", it.x + it.w / 2 - 13, it.y + it.h / 2 + 4);
+    } else if (it.type === "stove" || it.type === "toilet") {
+      const s = 0.8 * pxm();
+      ctx.strokeRect(it.x - s / 2, it.y - s / 2, s, s);
+      ctx.fillStyle = it.type === "stove" ? "#B3372A" : "#4A6B5A";
+      ctx.font = '13px "Kaiti SC","KaiTi",serif';
+      ctx.fillText(it.type === "stove" ? "灶" : "厕", it.x - 6, it.y + 4);
+    } else if (it.type === "mirror") {
+      ctx.strokeStyle = "#8A6A2F"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(it.x, it.y, 9, 0, 7); ctx.stroke();
+      ctx.fillStyle = "#8A6A2F"; ctx.font = '12px "Kaiti SC","KaiTi",serif';
+      ctx.fillText("镜", it.x + 12, it.y + 4);
+    }
+  });
+}
+cv.addEventListener("pointerdown", e => {
+  const r = cv.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top, m = pxm();
+  if (tool === "wall" && !plan.closed) plan.poly.push([x, y]);
+  else if (["entry", "door", "window", "balcony", "elevator"].includes(tool)) plan.openings.push({ type: tool, x, y });
+  else if (tool === "bed") plan.items.push({ type: "bed", x: x - 0.75 * m, y: y - 1 * m, w: 1.5 * m, h: 2 * m, head: "up" });
+  else if (tool === "sofa") plan.items.push({ type: "sofa", x: x - 0.9 * m, y: y - 0.45 * m, w: 1.8 * m, h: 0.9 * m });
+  else if (tool === "stove" || tool === "toilet") plan.items.push({ type: tool, x, y });
+  else if (tool === "mirror") plan.items.push({ type: "mirror", x, y });
+  else if (tool === "beam") plan.items.push({ type: "beam", x: x - 0.15 * m, y: y - 1.5 * m, w: 0.3 * m, h: 3 * m });
+  save(); draw();
+});
+document.getElementById("btn-head").addEventListener("click", () => {
+  const beds = plan.items.filter(i => i.type === "bed");
+  if (!beds.length) return;
+  const b = beds[beds.length - 1];
+  b.head = { up: "right", right: "down", down: "left", left: "up" }[b.head];
+  save(); draw();
+});
+pxmEl.addEventListener("change", draw);
+function save(){ localStorage.setItem("lz_plan", JSON.stringify({ plan, pxm: pxm() })); }
+try {
+  const s = JSON.parse(localStorage.getItem("lz_plan") || "null");
+  if (s) { plan = s.plan; if (s.pxm) pxmEl.value = s.pxm; }
+} catch (e) {}
+
+/* ================= 报告 ================= */
+const OUTSIDE = [["尖角煞", "邻楼尖角十米内正对门窗", 2], ["路冲", "直路百米内正对家门", 3]];
+document.getElementById("out-check").innerHTML = OUTSIDE.map((o, i) =>
+  `<li><input type="checkbox" id="oc-${i}" data-w="${o[2]}"><label for="oc-${i}"><b>${o[0]}</b>　${o[1]}</label></li>`).join("");
+
+document.getElementById("btn-run").addEventListener("click", () => {
+  const f = JSON.parse(localStorage.getItem("lz_facing") || "null");
+  const year = Number(document.getElementById("rep-year").value) || 2024;
+  const sitting = f ? FS.OPP_MTN[f.mtn] : null;      /* 向 → 坐 */
+  const r = XS.check({ poly: plan.poly, pxPerMeter: pxm(), openings: plan.openings, items: plan.items });
+  const info = document.getElementById("rep-info");
+  if (sitting) {
+    const fx = FS.feiXing(year, sitting);
+    const zhai = fx.sitPalace;
+    const zg = FS.EAST4.includes(zhai) ? "东四宅" : "西四宅";
+    const stars = FS.starsOf(zhai);
+    info.innerHTML =
+      `<div>坐向<b>坐${fx.sitting}向${fx.facing}</b></div><div>宅卦<b>${zhai}宅 · ${zg}</b></div>` +
+      `<div>宅运<b>${fx.period} 运</b></div><div>局型<b>${fx.pattern.split("（")[0]}</b></div>` +
+      (r.areaM2 ? `<div>面积约<b>${r.areaM2.toFixed(1)} ㎡</b></div>` : "");
+    document.getElementById("rep-grid").innerHTML = FS.GRID.flat().map(p => {
+      if (p === "中") return `<div><span class="star">☷</span>中宫</div>`;
+      const s = stars[p], g = FS.STAR_GRADE[s];
+      return `<div class="${g > 0 ? "ji" : "xiong"}"><span class="star">${s}</span>${p}·${FS.GUA_DIR[p]}</div>`;
+    }).join("");
+  } else {
+    info.innerHTML = `<div>未记朝向：仅出形煞部分，请先在罗盘页记录朝向</div>`;
+    document.getElementById("rep-grid").innerHTML = "";
+  }
+  const outs = [...document.querySelectorAll("#out-check input:checked")].map(c => Number(c.dataset.w));
+  const all = r.findings.map(f => ({ n: f.name, s: f.severity, d: f.detail, r: f.remedy }));
+  OUTSIDE.forEach((o, i) => { if (document.getElementById("oc-" + i).checked)
+    all.push({ n: o[0], s: o[2], d: o[1] + "（人工确认）", r: "窗帘遮挡、磨圆、绿植或围墙缓冲" }); });
+  all.sort((a, b) => b.s - a.s);
+  const sevName = s => s >= 3 ? "重" : s === 2 ? "中" : "轻";
+  document.getElementById("rep-findings").innerHTML = !all.length
+    ? `<li class="sev1"><span class="fname">未检出形煞</span><p class="detail">按已画户型与标记逐条核对，未见犯煞。布局整洁即是好风水的一半。</p></li>`
+    : all.map(x => `<li class="sev${Math.min(x.s, 3)}"><span class="sev">${sevName(x.s)}</span>` +
+        `<span class="fname">${x.n}</span><p class="detail">${x.d}</p><p class="remedy">传统化解：${x.r}</p></li>`).join("");
+});
+
+fitCanvas();
+draw();
+
+/* ================= PWA：安卓安装 + 离线 ================= */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const b = document.getElementById("btn-install");
+  b.hidden = false;
+  b.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    b.hidden = true;
+  }, { once: true });
+});
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>

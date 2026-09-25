@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+bambu-output/
+node_modules/
+.claude/
